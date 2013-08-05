@@ -3,6 +3,7 @@ static int ${signature_name}(lua_State* tolua_S)
 {
 	int argc = 0;
 	${namespaced_class_name}* cobj = nullptr;
+	bool ok  = true;
 \#if COCOS2D_DEBUG >= 1
 	tolua_Error tolua_err;
 \#endif
@@ -46,6 +47,10 @@ static int ${signature_name}(lua_State* tolua_S)
 			#set $arg_array += ["arg"+str(count)]
 			#set $count = $count + 1
 		#end while
+		#if $arg_idx > 0
+		if(!ok)
+			return 0;
+		#end if
 		#set $arg_list = ", ".join($arg_array)
 		#if $is_constructor
 		cobj = new ${namespaced_class_name}($arg_list);
@@ -62,6 +67,7 @@ static int ${signature_name}(lua_State* tolua_S)
 #else
 	    tolua_pushusertype(tolua_S,(void*)cobj,"$class_name");
 #end if
+	    return 1;
 		#else
 			#if $ret_type.name != "void"
 				#if $ret_type.is_enum
@@ -75,18 +81,21 @@ static int ${signature_name}(lua_State* tolua_S)
 									"ntype": $ret_type.name.replace("*", ""),
 									"class_name": $class_name,
 									"level": 2})};
+	    return 1;
 			#else
 		cobj->${func_name}($arg_list);
+		return 0;
 			#end if
-		#end if
-		return 1;
+		#end if		
 	}
 		#set $arg_idx = $arg_idx + 1
 	#end while
 #end if
+	printf("wrong number of arguments: %d, was expecting %d", argc, ${min_args});
+	return 0;
 \#if COCOS2D_DEBUG >= 1
 	tolua_lerror:
 	tolua_error(tolua_S,"#ferror in function '${signature_name}'.",&tolua_err);
-	return 0;
 \#endif
+	return 0;
 }
