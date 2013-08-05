@@ -552,3 +552,22 @@ void color3b_to_luaval(lua_State* L,const Color3B& cc)
     lua_rawset(L, -3);                                  /* table[key] = value, L: table */
 }
 
+namespace cocos2dTest
+{
+    SimpleNativeClass* SimpleNativeClass::create()
+    {
+        SimpleNativeClass* ret = new SimpleNativeClass();
+        printf("SimpleNativeClass static method: create... \n");
+        return ret;
+    }
+    
+    void SimpleNativeClass::staticOverLoadTest(int arg0 ,int arg1)
+    {
+        printf("SimpleNativeClass static method: staticOverLoadTest...%d,%d \n",arg0,arg1);
+    }
+    void SimpleNativeClass::staticOverLoadTest(const Color3B& c3b,int arg1)
+    {
+        printf("SimpleNativeClass static method: staticOverLoadTest...%u,%u,%u,%d \n",c3b.r,c3b.g,c3b.b,arg1);
+    }
+};
+

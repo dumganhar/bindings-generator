@@ -1,10 +1,19 @@
 ## ===== static function implementation template
-JSBool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+static int ${signature_name}(lua_State* tolua_S)
 {
-#if len($arguments) > 0
-	jsval *argv = JS_ARGV(cx, vp);
-	JSBool ok = JS_TRUE;
-#end if
+	int argc = 0;
+	bool ok  = true;
+
+\#if COCOS2D_DEBUG >= 1
+	tolua_Error tolua_err;
+\#endif
+
+\#if COCOS2D_DEBUG >= 1
+	if (!tolua_isusertable(tolua_S,1,"$class_name",0,&tolua_err)) goto tolua_lerror;
+\#endif
+
+	argc = lua_gettop(tolua_S) - 1;
+
 #if len($arguments) >= $min_args
 	#set arg_count = len($arguments)
 	#set arg_idx = $min_args
@@ -30,33 +39,38 @@ JSBool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
 	        #set $arg_array += ["arg"+str($count)]
 	        #set $count = $count + 1
 		#end while
-		#if $arg_idx > 0
-		JSB_PRECONDITION2(ok, cx, JS_FALSE, "Error processing arguments");
+		#if $arg_idx >= 0
+		if(!ok)
+			return 0;
 		#end if
 		#set $arg_list = ", ".join($arg_array)
-	#if str($ret_type) != "void"
+	#if $ret_type.name != "void"
 		#if $ret_type.is_enum
 		int ret = (int)${namespaced_class_name}::${func_name}($arg_list);
 		#else
 		${ret_type} ret = ${namespaced_class_name}::${func_name}($arg_list);
 		#end if
-		jsval jsret;
 		${ret_type.from_native({"generator": $generator,
-								"in_value": "ret",
-								"out_value": "jsret",
-								"ntype": str($ret_type),
-								"level": 1})};
-		JS_SET_RVAL(cx, vp, jsret);
+									"in_value": "ret",
+									"out_value": "ret",
+									"ntype": $ret_type.name.replace("*", ""),
+									"class_name": $class_name,
+									"level": 2})};
+	    return 1;
 	#else
 		${namespaced_class_name}::${func_name}($arg_list);
-		JS_SET_RVAL(cx, vp, JSVAL_VOID);
+		return 0;
 	#end if
-		return JS_TRUE;
 	}
 		#set $arg_idx = $arg_idx + 1
 	#end while
 #end if
-	JS_ReportError(cx, "wrong number of arguments");
-	return JS_FALSE;
+	printf("wrong number of arguments: %d, was expecting %d", argc, ${min_args});
+	return 0;
+\#if COCOS2D_DEBUG >= 1
+	tolua_lerror:
+	tolua_error(tolua_S,"#ferror in function '${signature_name}'.",&tolua_err);
+\#endif
+	return 0;
 }
 

@@ -207,6 +207,11 @@ public:
     {
         printf("overloadTest...sz = %s param2 = %d\n",sz,param2);
     }
+    
+    static SimpleNativeClass* create();
+    
+    static void staticOverLoadTest(int arg0 ,int arg1 = 0);
+    static void staticOverLoadTest(const Color3B& c3b,int arg1);
 private:
     Point _pt;
     Rect  _rt;
