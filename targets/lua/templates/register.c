@@ -8,17 +8,17 @@ ${current_class.methods.constructor.generate_code($current_class)}
 #set methods = $current_class.methods_clean()
 #set st_methods = $current_class.static_methods_clean()
 #
-static int lua_${generator.prefix}_${current_class.class_name}_finalize(lua_State* tolua_S)
+#if not $current_class.is_ref_class
+static int lua_gc_callback_${generator.prefix}_${current_class.class_name}(lua_State* tolua_S)
 {
-    printf("luabindings: finalizing LUA object (${current_class.class_name})");
-#if $generator.script_control_cpp
+    printf("luabindings: finalizing LUA object (${current_class.class_name})\n");
 \#if COCOS2D_DEBUG >= 1
     tolua_Error tolua_err;
-    if (
-    !tolua_isusertype(tolua_S,1,"${current_class.class_name}",0,&tolua_err) ||
-    !tolua_isnoobj(tolua_S,2,&tolua_err)
-    )
+    if (   !tolua_isusertype(tolua_S,1,"${generator.scriptname_from_native($current_class.namespaced_class_name)}",0,&tolua_err) 
+        || !tolua_isnoobj(tolua_S,2,&tolua_err))
+    {
         goto tolua_lerror;
+    }
     else
 \#endif
     {
@@ -32,21 +32,27 @@ static int lua_${generator.prefix}_${current_class.class_name}_finalize(lua_Stat
 \#if COCOS2D_DEBUG >= 1
     tolua_lerror:
     tolua_error(tolua_S,"#ferror in function 'delete'.",&tolua_err);
-    return 0;
 \#endif
-#end if
     return 0;
 }
+#end if
 
 int lua_register_${generator.prefix}_${current_class.class_name}(lua_State* tolua_S)
 {
     tolua_usertype(tolua_S,"${generator.scriptname_from_native($current_class.namespaced_class_name)}");
-    #if len($current_class.parents) > 0
-    tolua_cclass(tolua_S,"${current_class.class_name}","${generator.scriptname_from_native($current_class.namespaced_class_name)}","${generator.scriptname_from_native($current_class.parents[0].namespaced_class_name)}",nullptr);
+    #if $current_class.is_ref_class
+        #if len($current_class.parents) > 0
+    tolua_cclass(tolua_S,"${current_class.class_name}","${generator.scriptname_from_native($current_class.namespaced_class_name)}","${generator.scriptname_from_native($current_class.parents[0].namespaced_class_name)}",lua_gc_callback_of_ref_class);
+        #else
+    tolua_cclass(tolua_S,"${current_class.class_name}","${generator.scriptname_from_native($current_class.namespaced_class_name)}","",lua_gc_callback_of_ref_class);
+        #end if
     #else
-    tolua_cclass(tolua_S,"${current_class.class_name}","${generator.scriptname_from_native($current_class.namespaced_class_name)}","",nullptr);
+        #if len($current_class.parents) > 0
+    tolua_cclass(tolua_S,"${current_class.class_name}","${generator.scriptname_from_native($current_class.namespaced_class_name)}","${generator.scriptname_from_native($current_class.parents[0].namespaced_class_name)}",lua_gc_callback_${generator.prefix}_${current_class.class_name});
+        #else
+    tolua_cclass(tolua_S,"${current_class.class_name}","${generator.scriptname_from_native($current_class.namespaced_class_name)}","",lua_gc_callback_${generator.prefix}_${current_class.class_name});
+        #end if
     #end if
-
     tolua_beginmodule(tolua_S,"${current_class.class_name}");
     #if len(methods) > 0
         #for m in methods
