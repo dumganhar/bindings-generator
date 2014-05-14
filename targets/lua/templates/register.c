@@ -14,7 +14,7 @@ static int lua_gc_callback_${generator.prefix}_${current_class.class_name}(lua_S
     printf("luabindings: finalizing LUA object (${current_class.class_name})\n");
 \#if COCOS2D_DEBUG >= 1
     tolua_Error tolua_err;
-    if (   !tolua_isusertype(tolua_S,1,"${generator.scriptname_from_native($current_class.namespaced_class_name)}",0,&tolua_err) 
+    if (   !tolua_isusertype(tolua_S,1,"${generator.scriptname_from_native($current_class.namespaced_class_name)}",0,&tolua_err)
         || !tolua_isnoobj(tolua_S,2,&tolua_err))
     {
         goto tolua_lerror;
@@ -26,7 +26,12 @@ static int lua_gc_callback_${generator.prefix}_${current_class.class_name}(lua_S
 \#if COCOS2D_DEBUG >= 1
         if (!self) tolua_error(tolua_S,"invalid 'self' in function 'delete'", nullptr);
 \#endif
+#if $current_class.is_in_list_of_life_controlled_in_cpp
+        printf("Skip to release cpp object\n");
+#else
+        printf("Before deleting cpp object\n");
         delete self;
+#end if
     }
     return 0;
 \#if COCOS2D_DEBUG >= 1

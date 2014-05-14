@@ -590,6 +590,15 @@ class NativeClass(object):
     def underlined_class_name(self):
         return self.namespaced_class_name.replace("::", "_")
 
+    @property
+    def is_in_list_of_life_controlled_in_cpp(self):
+        if self.generator.classes_life_controlled_in_cpp:
+            for klass in self.generator.classes_life_controlled_in_cpp:
+                if re.match('^' + klass + '$', self.class_name):
+                    print("matched: class: " + self.class_name)
+                    return True
+        return False
+
     def parse(self):
         '''
         parse the current cursor, getting all the necesary information
@@ -668,7 +677,7 @@ class NativeClass(object):
             m['impl'].generate_code(self)
         for m in self.static_methods_clean():
             m['impl'].generate_code(self)
-        if self.generator.script_type == "lua":  
+        if self.generator.script_type == "lua":
             for m in self.override_methods_clean():
                 m['impl'].generate_code(self, is_override = True)
         # generate register section
@@ -816,6 +825,7 @@ class Generator(object):
         self.headers = opts['headers'].split(' ')
         self.classes = opts['classes']
         self.classes_need_extend = opts['classes_need_extend']
+        self.classes_life_controlled_in_cpp = opts['classes_life_controlled_in_cpp']
         self.classes_have_no_parents = opts['classes_have_no_parents'].split(' ')
         self.base_classes_to_skip = opts['base_classes_to_skip'].split(' ')
         self.abstract_classes = opts['abstract_classes'].split(' ')
@@ -962,7 +972,7 @@ class Generator(object):
             docfilepath = os.path.join(docfiledir, self.out_file + "_api.lua")
         else:
             docfilepath = os.path.join(docfiledir, self.out_file + "_api.js")
-        
+
         self.impl_file = open(implfilepath, "w+")
         self.head_file = open(headfilepath, "w+")
         self.doc_file = open(docfilepath, "w+")
@@ -1001,7 +1011,7 @@ class Generator(object):
             print "%s. <severity = %s,\n    location = %r,\n    details = %r>" % (
                 idx+1, severities[d.severity], d.location, d.spelling)
         print("====\n")
-        
+
     def _parse_headers(self):
         for header in self.headers:
             tu = self.index.parse(header, self.clang_args)
@@ -1282,6 +1292,7 @@ def main():
                 'headers':    (config.get(s, 'headers'        , 0, dict(userconfig.items('DEFAULT')))),
                 'classes': config.get(s, 'classes').split(' '),
                 'classes_need_extend': config.get(s, 'classes_need_extend').split(' ') if config.has_option(s, 'classes_need_extend') else [],
+                'classes_life_controlled_in_cpp': config.get(s, 'classes_life_controlled_in_cpp').split(' ') if config.has_option(s, 'classes_life_controlled_in_cpp') else [],
                 'clang_args': (config.get(s, 'extra_arguments', 0, dict(userconfig.items('DEFAULT'))) or "").split(" "),
                 'target': os.path.join(workingdir, "targets", t),
                 'outdir': outdir,
