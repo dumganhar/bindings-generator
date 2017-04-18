@@ -46,19 +46,26 @@ void js_${current_class.underlined_class_name}_finalize(JSFreeOp *fop, JSObject 
 #end if
 #end if
 void js_register_${generator.prefix}_${current_class.class_name}(JSContext *cx, JS::HandleObject global) {
-    jsb_${current_class.underlined_class_name}_class = (JSClass *)calloc(1, sizeof(JSClass));
-    jsb_${current_class.underlined_class_name}_class->name = "${current_class.target_class_name}";
-    jsb_${current_class.underlined_class_name}_class->addProperty = JS_PropertyStub;
-    jsb_${current_class.underlined_class_name}_class->delProperty = JS_DeletePropertyStub;
-    jsb_${current_class.underlined_class_name}_class->getProperty = JS_PropertyStub;
-    jsb_${current_class.underlined_class_name}_class->setProperty = JS_StrictPropertyStub;
-    jsb_${current_class.underlined_class_name}_class->enumerate = JS_EnumerateStub;
-    jsb_${current_class.underlined_class_name}_class->resolve = JS_ResolveStub;
-    jsb_${current_class.underlined_class_name}_class->convert = JS_ConvertStub;
-#if (not $current_class.is_ref_class and $has_constructor)
-    jsb_${current_class.underlined_class_name}_class->finalize = js_${current_class.underlined_class_name}_finalize;
+    static const JSClassOps classOps = {
+        nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr,
+        nullptr,
+#if (not $current_class.is_ref_class and $has_constructor) 
+        js_${current_class.underlined_class_name}_finalize,
+#else
+        nullptr,
 #end if
-    jsb_${current_class.underlined_class_name}_class->flags = JSCLASS_HAS_RESERVED_SLOTS(2);
+        nullptr, nullptr, nullptr,
+        JS_GlobalObjectTraceHook
+    };
+
+    static const JSClass cls = {
+        "${current_class.target_class_name}",
+        JSCLASS_HAS_RESERVED_SLOTS(2),
+        &classOps
+    };
+
+    jsb_${current_class.underlined_class_name}_class = &cls;
 
     static JSPropertySpec properties[] = {
 #for m in public_fields
@@ -100,7 +107,7 @@ void js_register_${generator.prefix}_${current_class.class_name}(JSContext *cx, 
 #if len($current_class.parents) > 0
         parent_proto,
 #else
-        JS::NullPtr(),
+        nullptr,
 #end if
         jsb_${current_class.underlined_class_name}_class,
 #if has_constructor
@@ -128,7 +135,7 @@ void js_register_${generator.prefix}_${current_class.class_name}(JSContext *cx, 
 #if len($current_class.parents) > 0
     jsb_register_class<${current_class.namespaced_class_name}>(cx, jsb_${current_class.underlined_class_name}_class, proto, parent_proto);
 #else
-    jsb_register_class<${current_class.namespaced_class_name}>(cx, jsb_${current_class.underlined_class_name}_class, proto, JS::NullPtr());
+    jsb_register_class<${current_class.namespaced_class_name}>(cx, jsb_${current_class.underlined_class_name}_class, proto, nullptr);
 #end if
 #if $generator.in_listed_extend_classed($current_class.class_name) and not $current_class.is_abstract
     anonEvaluate(cx, global, "(function () { ${generator.target_ns}.${current_class.target_class_name}.extend = cc.Class.extend; })()");

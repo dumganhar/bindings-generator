@@ -1,5 +1,5 @@
 ## ===== ctor function implementation template
-static bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+static bool ${signature_name}(JSContext *cx, uint32_t argc, JS::Value *vp)
 {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
     JS::RootedObject obj(cx, args.thisv().toObjectOrNull());
@@ -48,7 +48,7 @@ static bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
 #end if
     bool isFound = false;
     if (JS_HasProperty(cx, obj, "_ctor", &isFound) && isFound)
-        ScriptingCore::getInstance()->executeFunctionWithOwner(OBJECT_TO_JSVAL(obj), "_ctor", args);
+        ScriptingCore::getInstance()->executeFunctionWithOwner(JS::ObjectValue(*obj), "_ctor", args);
     args.rval().setUndefined();
     return true;
 #end if

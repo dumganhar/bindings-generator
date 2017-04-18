@@ -104,9 +104,9 @@ conversions:
     "@basic_string<char>\\s*&?": "${out_value} = std_string_to_jsval(cx, ${in_value})"
     "std::string": "${out_value} = std_string_to_jsval(cx, ${in_value})"
     "char*": "${out_value} = c_string_to_jsval(cx, ${in_value})"
-    bool: "${out_value} = BOOLEAN_TO_JSVAL(${in_value})"
-    float: "${out_value} = DOUBLE_TO_JSVAL(${in_value})"
-    double: "${out_value} = DOUBLE_TO_JSVAL(${in_value})"
+    bool: "${out_value} = JS::BooleanValue(${in_value})"
+    float: "${out_value} = JS::DoubleValue(${in_value})"
+    double: "${out_value} = JS::DoubleValue(${in_value})"
     long: "${out_value} = long_to_jsval(cx, ${in_value})"
     "unsigned long": "${out_value} = ulong_to_jsval(cx, ${in_value})"
     "ssize_t": "${out_value} = ssize_to_jsval(cx, ${in_value})"
@@ -159,7 +159,7 @@ conversions:
     "@shared_ptr<.*DownloadTask.*": "${out_value} = downloadTask_to_jsval(cx, *${in_value})"
     object: |
       if (${in_value}) {
-      ${($level + 1) * '    '}${out_value} = OBJECT_TO_JSVAL(js_get_or_create_jsobject<${ntype.replace("*", "").replace("const ", "")}>(cx, (${ntype.replace("const ", "")})${in_value}));
+      ${($level + 1) * '    '}${out_value} = JS::ObjectValue(*js_get_or_create_jsobject<${ntype.replace("*", "").replace("const ", "")}>(cx, (${ntype.replace("const ", "")})${in_value}));
       ${($level    ) * '    '}} else {
-      ${($level + 1) * '    '}${out_value} = JSVAL_NULL;
+      ${($level + 1) * '    '}${out_value} = JS::NullValue();
       ${($level    ) * '    '}}

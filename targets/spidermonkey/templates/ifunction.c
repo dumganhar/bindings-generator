@@ -1,5 +1,5 @@
 ## ===== instance function implementation template
-bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+bool ${signature_name}(JSContext *cx, uint32_t argc, JS::Value *vp)
 {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 #if len($arguments) > 0
@@ -51,7 +51,7 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
 
         js_type_class_t *typeClass = js_get_type_from_native<${namespaced_class_name}>(cobj);
         JS::RootedObject jsobj(cx, jsb_ref_create_jsobject(cx, cobj, typeClass, "${namespaced_class_name}"));
-        args.rval().set(OBJECT_TO_JSVAL(jsobj));
+        args.rval().set(JS::ObjectValue(*jsobj));
         #else
             #if $ret_type.name != "void"
                 #if $ret_type.is_enum
@@ -77,6 +77,6 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
     #end while
 #end if
 
-    JS_ReportError(cx, "${signature_name} : wrong number of arguments: %d, was expecting %d", argc, ${min_args});
+    JS_ReportErrorUTF8(cx, "${signature_name} : wrong number of arguments: %d, was expecting %d", argc, ${min_args});
     return false;
 }

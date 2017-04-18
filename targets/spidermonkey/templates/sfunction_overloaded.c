@@ -1,5 +1,5 @@
 ## ===== static function implementation template - for overloaded functions
-bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+bool ${signature_name}(JSContext *cx, uint32_t argc, JS::Value *vp)
 {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
     bool ok = true;
@@ -42,7 +42,7 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
                 #else
             ${func.ret_type.get_whole_name($generator)} ret = ${namespaced_class_name}::${func.func_name}($arg_list);
                 #end if
-            jsval jsret = JSVAL_NULL;
+            JS::Value jsret = JS::NullValue();
             ${func.ret_type.from_native({"generator": $generator,
                                          "in_value": "ret",
                                          "out_value": "jsret",
@@ -59,6 +59,6 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
     #end while
     #end if
     #end for
-    JS_ReportError(cx, "${signature_name} : wrong number of arguments");
+    JS_ReportErrorUTF8(cx, "${signature_name} : wrong number of arguments");
     return false;
 }

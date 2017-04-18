@@ -7,7 +7,7 @@ do {
             JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
             #set arg_count = len($param_types)
             #if $arg_count > 0
-            jsval largv[${arg_count}];
+            JS::Value largv[${arg_count}];
             #end if
             #set $count = 0
             #while $count < $arg_count
@@ -27,7 +27,7 @@ do {
             bool succeed = func->invoke(${arg_count}, nullptr, &rval);
             #end if
             if (!succeed && JS_IsExceptionPending(cx)) {
-                JS_ReportPendingException(cx);
+//cjh                JS_ReportPendingException(cx);
             }
             #if $ret_type.name != "void"
             bool ok = true;

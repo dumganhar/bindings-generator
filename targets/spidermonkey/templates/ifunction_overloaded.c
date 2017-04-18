@@ -1,5 +1,5 @@
 ## ===== instance function implementation template - for overloaded functions
-bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+bool ${signature_name}(JSContext *cx, uint32_t argc, JS::Value *vp)
 {
     bool ok = true;
     ${namespaced_class_name}* cobj = nullptr;
@@ -59,8 +59,7 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
             #if not $is_ctor
             js_type_class_t *typeClass = js_get_type_from_native<${namespaced_class_name}>(cobj);
             JS::RootedObject proto(cx, typeClass->proto.ref());
-            JS::RootedObject parent(cx, typeClass->parentProto.ref());
-            obj = JS_NewObject(cx, typeClass->jsclass, proto, parent);
+            obj = JS_NewObjectWithGivenProto(cx, typeClass->jsclass, proto);
             #end if
             js_proxy_t* p = jsb_new_proxy(cobj, obj);
             #if $is_ref_class
@@ -75,7 +74,7 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
                 #else
             ${func.ret_type.get_whole_name($generator)} ret = cobj->${func.func_name}($arg_list);
                 #end if
-            jsval jsret = JSVAL_NULL;
+            JS::Value jsret = JS::NullValue();
             ${func.ret_type.from_native({"generator": $generator,
                                                       "in_value": "ret",
                                                       "out_value": "jsret",
@@ -98,12 +97,12 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
 #if $is_constructor
     if (cobj) {
         if (JS_HasProperty(cx, obj, "_ctor", &ok) && ok)
-                ScriptingCore::getInstance()->executeFunctionWithOwner(OBJECT_TO_JSVAL(obj), "_ctor", args);
+                ScriptingCore::getInstance()->executeFunctionWithOwner(JS::ObjectValue(*obj), "_ctor", args);
 
-        args.rval().set(OBJECT_TO_JSVAL(obj));
+        args.rval().set(JS::ObjectValue(*obj));
         return true;
     }
 #end if
-    JS_ReportError(cx, "${signature_name} : wrong number of arguments");
+    JS_ReportErrorUTF8(cx, "${signature_name} : wrong number of arguments");
     return false;
 }
