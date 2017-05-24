@@ -1,7 +1,7 @@
 ## ===== static function implementation template - for overloaded functions
-bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+
+SE_FUNC_BEGIN(${signature_name}, se::DONT_NEED_THIS)
 {
-    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
     bool ok = true;
     #for func in $implementations
     
@@ -24,7 +24,7 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
             ${arg.to_string($generator)} arg${count};
                 #end if
             ${arg.to_native({"generator": $generator,
-                             "in_value": "args.get(" + str(count) + ")",
+                             "in_value": "args[" + str(count) + "]",
                              "out_value": "arg" + str(count),
                              "class_name": $class_name,
                              "level": 3,
@@ -38,27 +38,25 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
             #set $arg_list = ", ".join($arg_array)
             #if str($func.ret_type) != "void"
                 #if $func.ret_type.is_enum
-            int ret = (int)${namespaced_class_name}::${func.func_name}($arg_list);
+            int result = (int)${namespaced_class_name}::${func.func_name}($arg_list);
                 #else
-            ${func.ret_type.get_whole_name($generator)} ret = ${namespaced_class_name}::${func.func_name}($arg_list);
+            ${func.ret_type.get_whole_name($generator)} result = ${namespaced_class_name}::${func.func_name}($arg_list);
                 #end if
-            jsval jsret = JSVAL_NULL;
+            se::Value jsret;
             ${func.ret_type.from_native({"generator": $generator,
-                                         "in_value": "ret",
+                                         "in_value": "result",
                                          "out_value": "jsret",
                                          "ntype": str($func.ret_type),
                                          "level": 3})};
-            args.rval().set(jsret);
+            SE_SET_RVAL(jsret);
             #else
             ${namespaced_class_name}::${func.func_name}($arg_list);
             #end if
-            return true;
         }
         #set $arg_idx = $arg_idx + 1
     } while (0);
     #end while
     #end if
     #end for
-    JS_ReportError(cx, "${signature_name} : wrong number of arguments");
-    return false;
 }
+SE_FUNC_END

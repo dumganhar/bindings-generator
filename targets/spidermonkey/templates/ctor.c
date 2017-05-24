@@ -1,8 +1,7 @@
 ## ===== ctor function implementation template
-static bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+
+SE_CTOR2_BEGIN(${signature_name}, ${class_name}, js_${generator.prefix}_${class_name}_finalize)
 {
-    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-    JS::RootedObject obj(cx, args.thisv().toObjectOrNull());
 #if len($arguments) >= $min_args
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
@@ -27,7 +26,7 @@ static bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
     #while $count < $arg_idx
         #set $arg = $arguments[$count]
     ${arg.to_native({"generator": $generator,
-                         "in_value": "args.get(" + str(count) + ")",
+                         "in_value": "args[" + str(count) + "]",
                          "out_value": "arg" + str(count),
                          "class_name": $class_name,
                          "level": 2,
@@ -36,20 +35,11 @@ static bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
         #set $count = $count + 1
     #end while
     #if $arg_idx > 0
-    JSB_PRECONDITION2(ok, cx, false, "js_${underlined_class_name}_ctor : Error processing arguments");
+    JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
     #end if
     #set $arg_list = ", ".join($arg_array)
-    ${namespaced_class_name} *nobj = new (std::nothrow) ${namespaced_class_name}($arg_list);
-    js_proxy_t* p = jsb_new_proxy(nobj, obj);
-#if $is_ref_class
-    jsb_ref_init(cx, &p->obj, nobj, "${namespaced_class_name}");
-#else
-    AddNamedObjectRoot(cx, &p->obj, "${namespaced_class_name}");
-#end if
-    bool isFound = false;
-    if (JS_HasProperty(cx, obj, "_ctor", &isFound) && isFound)
-        ScriptingCore::getInstance()->executeFunctionWithOwner(OBJECT_TO_JSVAL(obj), "_ctor", args);
-    args.rval().setUndefined();
-    return true;
+    ${namespaced_class_name}* cobj = new (std::nothrow) ${namespaced_class_name}($arg_list);
+    thisObject->setPrivateData(cobj);
 #end if
 }
+SE_CTOR2_END

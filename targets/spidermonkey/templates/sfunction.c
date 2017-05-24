@@ -1,10 +1,8 @@
 ## ===== static function implementation template
-bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
+
+SE_FUNC_BEGIN(${signature_name}, se::DONT_NEED_THIS)
 {
-    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-#if len($arguments) > 0
     bool ok = true;
-#end if
 #if len($arguments) >= $min_args
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
@@ -28,7 +26,7 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
         #while $count < $arg_idx
             #set $arg = $arguments[$count]
         ${arg.to_native({"generator": $generator,
-            "in_value": "args.get(" + str(count) + ")",
+            "in_value": "args[" + str(count) + "]",
             "out_value": "arg" + str(count),
             "class_name": $class_name,
             "level": 2,
@@ -37,45 +35,51 @@ bool ${signature_name}(JSContext *cx, uint32_t argc, jsval *vp)
             #set $count = $count + 1
         #end while
         #if $arg_idx > 0
-        JSB_PRECONDITION2(ok, cx, false, "${signature_name} : Error processing arguments");
+        JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
         #end if
         #set $arg_list = ", ".join($arg_array)
     #if str($ret_type) != "void"
-
         #if $func_name.startswith("create") and $is_ref_class
-        auto ret = ${namespaced_class_name}::${func_name}($arg_list);
-        js_type_class_t *typeClass = js_get_type_from_native<${namespaced_class_name}>(ret);
-        JS::RootedObject jsret(cx, jsb_ref_autoreleased_create_jsobject(cx, ret, typeClass, "${namespaced_class_name}"));
-        args.rval().set(OBJECT_TO_JSVAL(jsret));
+        auto result = ${namespaced_class_name}::${func_name}($arg_list);
+        result->retain();
+        auto obj = se::Object::createObjectWithClass(__jsb_${class_name}_class, false);
+        obj->setPrivateData(result);
+        SE_SET_RVAL(se::Value(obj));
         #elif $func_name.startswith("getInstance") and $is_ref_class
-        auto ret = ${namespaced_class_name}::${func_name}($arg_list);
-        js_type_class_t *typeClass = js_get_type_from_native<${namespaced_class_name}>(ret);
-        JS::RootedObject jsret(cx, jsb_ref_get_or_create_jsobject(cx, ret, typeClass, "${namespaced_class_name}"));
-        args.rval().set(OBJECT_TO_JSVAL(jsret));
+        auto result = ${namespaced_class_name}::${func_name}($arg_list);
+        se::Object* obj = nullptr;
+        if (result->_scriptObject == nullptr)
+        {
+            obj = se::Object::createObjectWithClass(__jsb_${class_name}_class, true);
+            obj->setPrivateData(result);
+            result->_scriptObject = obj;
+        }
+        else
+        {
+            obj = se::Object::getObjectWithPtr(result);
+        }
+        assert(obj);
+        SE_SET_RVAL(se::Value(obj));
         #else
           #if $ret_type.is_enum
-        int ret = (int)${namespaced_class_name}::${func_name}($arg_list);
+        int result = (int)${namespaced_class_name}::${func_name}($arg_list);
           #else
-        ${ret_type.get_whole_name($generator)} ret = ${namespaced_class_name}::${func_name}($arg_list);
+        ${ret_type.get_whole_name($generator)} result = ${namespaced_class_name}::${func_name}($arg_list);
           #end if
-        jsval jsret = JSVAL_NULL;
+        se::Value jsret;
         ${ret_type.from_native({"generator": $generator,
-                                "in_value": "ret",
+                                "in_value": "result",
                                 "out_value": "jsret",
                                 "ntype": str($ret_type),
                                 "level": 1})};
-        args.rval().set(jsret);
+        SE_SET_RVAL(jsret);
         #end if
     #else
         ${namespaced_class_name}::${func_name}($arg_list);
-        args.rval().setUndefined();
     #end if
-        return true;
     }
         #set $arg_idx = $arg_idx + 1
     #end while
 #end if
-    JS_ReportError(cx, "${signature_name} : wrong number of arguments");
-    return false;
 }
-
+SE_FUNC_END
