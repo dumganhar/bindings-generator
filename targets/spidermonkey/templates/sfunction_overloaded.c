@@ -1,6 +1,6 @@
 ## ===== static function implementation template - for overloaded functions
 
-SE_FUNC_BEGIN(${signature_name}, se::DONT_NEED_THIS)
+SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator should support configrue NEED_THIS flag
 {
     bool ok = true;
     #for func in $implementations

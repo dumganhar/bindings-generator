@@ -8,17 +8,19 @@ ${current_class.methods.constructor.generate_code($current_class)}
 #set methods = $current_class.methods_clean()
 #set st_methods = $current_class.static_methods_clean()
 #set public_fields = $current_class.public_fields
+#if $has_constructor
 SE_FINALIZE_FUNC_BEGIN(js_${generator.prefix}_${current_class.class_name}_finalize)
 {
-    CCLOGINFO("jsbindings: finalizing JS object %p (${current_class.namespaced_class_name})", nativeThisObject);
+    CCLOG("jsbindings: finalizing JS object %p (${current_class.namespaced_class_name})", nativeThisObject);
     ${current_class.namespaced_class_name}* cobj = (${current_class.namespaced_class_name}*)nativeThisObject;
     #if $current_class.is_ref_class
     cobj->release();
     #else
-    //FIXME: delete cobj;
+    delete cobj;
     #end if
 }
 SE_FINALIZE_FUNC_END
+#end if
 #if $generator.in_listed_extend_classed($current_class.class_name) and $has_constructor
 #if not $constructor.is_overloaded
     ${constructor.generate_code($current_class, None, False, True)}
@@ -31,15 +33,15 @@ bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj
 {
 #if has_constructor
     #if len($current_class.parents) > 0
-    auto cls = se::Class::create("${current_class.class_name}", obj, __jsb_${current_class.parents[0].class_name}_proto, js_${generator.prefix}_${current_class.class_name}_constructor);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${current_class.parents[0].class_name}_proto, js_${generator.prefix}_${current_class.class_name}_constructor);
     #else
-    auto cls = se::Class::create("${current_class.class_name}", obj, nullptr, js_${generator.prefix}_${current_class.class_name}_constructor);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, nullptr, js_${generator.prefix}_${current_class.class_name}_constructor);
     #end if
 #else
     #if len($current_class.parents) > 0
-    auto cls = se::Class::create("${current_class.class_name}", obj, __jsb_${current_class.parents[0].class_name}_proto, nullptr);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${current_class.parents[0].class_name}_proto, nullptr);
     #else
-    auto cls = se::Class::create("${current_class.class_name}", obj, nullptr, nullptr);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, nullptr, nullptr);
     #end if
 #end if
 
@@ -61,7 +63,9 @@ bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj
     cls->defineStaticFunction("${m['name']}", ${fn.signature_name});
     #end for
 #end if
+#if $has_constructor
     cls->defineFinalizedFunction(js_${generator.prefix}_${current_class.class_name}_finalize);
+#end if
     cls->install();
 
     __jsb_${current_class.class_name}_proto = cls->getProto();
