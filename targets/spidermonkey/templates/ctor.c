@@ -1,6 +1,6 @@
 ## ===== ctor function implementation template
 
-SE_CTOR2_BEGIN(${signature_name}, ${class_name}, js_${generator.prefix}_${class_name}_finalize)
+SE_CTOR2_BEGIN(${signature_name}, __jsb_${generator.prefix}_${class_name}_class, js_${generator.prefix}_${class_name}_finalize)
 {
 #if len($arguments) >= $min_args
     #set arg_count = len($arguments)

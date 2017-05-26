@@ -148,4 +148,4 @@ conversions:
     # "ManifestAsset": "${out_value} = asset_to_jsval(${in_value})"
     # "@DownloadTask.*": "${out_value} = downloadTask_to_jsval(${in_value})"
     # "@shared_ptr<.*DownloadTask.*": "${out_value} = downloadTask_to_jsval(*${in_value})"
-    object: "ok &= native_ptr_to_seval<${ntype.replace('*', '').replace('const ', '')}>((${ntype.replace('const ', '')})${in_value}), &${out_value})"
+    object: "ok &= native_ptr_to_seval<${ntype.replace('*', '').replace('const ', '')}>((${ntype.replace('const ', '')})${in_value}, __jsb_${generator.prefix}_${class_name}_class, &${out_value})"

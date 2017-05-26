@@ -50,6 +50,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         ${ret_type.from_native({"generator": $generator,
                                     "in_value": "result",
                                     "out_value": "jsret",
+                                    "class_name": $ret_type.get_class_name($generator),
                                     "ntype": str($ret_type),
                                     "level": 2})};
         SE_SET_RVAL(jsret);

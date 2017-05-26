@@ -321,6 +321,7 @@ class NativeType(object):
         assert(convert_opts.has_key('generator'))
         generator = convert_opts['generator']
         keys = []
+        # print("from_native:" + str(convert_opts))
 
         if self.canonical_type != None:
             keys.append(self.canonical_type.name)
@@ -414,9 +415,20 @@ class NativeType(object):
             to_replace = NativeType.dict_replace_value_re(native_types_dict, [name])
 
         if to_replace:
+            # print("get_whole_name: " + name + " --> " + to_replace)
             name = to_replace
 
         return name
+
+    def get_class_name(self, generator):
+        original_name = self.to_string(generator);
+        if original_name.find('>') != -1:
+            return original_name
+
+        cls_name = original_name.replace('*', '').replace('const ', '').replace('&', '')
+        cls_name = cls_name.split("::")[-1]
+        print("get_class_name: " + original_name + " -> " + cls_name)
+        return cls_name;
 
     def object_can_convert(self, generator, is_to_native = True):
         if self.is_object:

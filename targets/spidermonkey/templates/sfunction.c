@@ -42,7 +42,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         #if $func_name.startswith("create") and $is_ref_class
         auto result = ${namespaced_class_name}::${func_name}($arg_list);
         result->retain();
-        auto obj = se::Object::createObjectWithClass(__jsb_${class_name}_class, false);
+        auto obj = se::Object::createObjectWithClass(__jsb_${generator.prefix}_${class_name}_class, false);
         obj->setPrivateData(result);
         SE_SET_RVAL(se::Value(obj));
         #elif $func_name.startswith("getInstance") and $is_ref_class
@@ -50,7 +50,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         se::Object* obj = nullptr;
         if (result->_scriptObject == nullptr)
         {
-            obj = se::Object::createObjectWithClass(__jsb_${class_name}_class, true);
+            obj = se::Object::createObjectWithClass(__jsb_${generator.prefix}_${class_name}_class, true);
             obj->setPrivateData(result);
             result->_scriptObject = obj;
         }
@@ -70,6 +70,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         ${ret_type.from_native({"generator": $generator,
                                 "in_value": "result",
                                 "out_value": "jsret",
+                                "class_name": $ret_type.get_class_name($generator),
                                 "ntype": str($ret_type),
                                 "level": 1})};
         SE_SET_RVAL(jsret);

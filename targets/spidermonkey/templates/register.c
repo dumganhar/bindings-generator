@@ -33,13 +33,13 @@ bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj
 {
 #if has_constructor
     #if len($current_class.parents) > 0
-    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${current_class.parents[0].class_name}_proto, js_${generator.prefix}_${current_class.class_name}_constructor);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${generator.prefix}_${current_class.parents[0].class_name}_proto, js_${generator.prefix}_${current_class.class_name}_constructor);
     #else
     auto cls = se::Class::create("${current_class.target_class_name}", obj, nullptr, js_${generator.prefix}_${current_class.class_name}_constructor);
     #end if
 #else
     #if len($current_class.parents) > 0
-    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${current_class.parents[0].class_name}_proto, nullptr);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${generator.prefix}_${current_class.parents[0].class_name}_proto, nullptr);
     #else
     auto cls = se::Class::create("${current_class.target_class_name}", obj, nullptr, nullptr);
     #end if
@@ -68,8 +68,8 @@ bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj
 #end if
     cls->install();
 
-    __jsb_${current_class.class_name}_proto = cls->getProto();
-    __jsb_${current_class.class_name}_class = cls;
+    __jsb_${generator.prefix}_${current_class.class_name}_proto = cls->getProto();
+    __jsb_${generator.prefix}_${current_class.class_name}_class = cls;
 
 #if $generator.in_listed_extend_classed($current_class.class_name) and not $current_class.is_abstract
     se::ScriptEngine::getInstance()->executeScriptBuffer("(function () { ${generator.target_ns}.${current_class.target_class_name}.extend = cc.Class.extend; })()");
