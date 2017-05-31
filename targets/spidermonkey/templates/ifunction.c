@@ -1,11 +1,13 @@
 ## ===== instance function implementation template
 
-SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator should support configrue NEED_THIS flag
+static bool ${signature_name}(se::State& s)
 {
-    bool ok = true;
-    ${namespaced_class_name}* cobj = (${namespaced_class_name}*)nativeThisObject;
-    JSB_PRECONDITION2(cobj, false, "${signature_name} : Invalid Native Object");
+    ${namespaced_class_name}* cobj = (${namespaced_class_name}*)s.nativeThisObject();
+    JSB_PRECONDITION3(cobj, false, "${signature_name} : Invalid Native Object");
 #if len($arguments) >= $min_args
+    bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
     #while $arg_idx <= $arg_count
@@ -37,7 +39,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
             #set $count = $count + 1
         #end while
         #if $arg_idx > 0
-        JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
+        JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
         #end if
         #set $arg_list = ", ".join($arg_array)
         #if $ret_type.name != "void"
@@ -46,14 +48,12 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
             #else
         ${ret_type.get_whole_name($generator)} result = cobj->${func_name}($arg_list);
             #end if
-        se::Value jsret;
         ${ret_type.from_native({"generator": $generator,
                                     "in_value": "result",
-                                    "out_value": "jsret",
+                                    "out_value": "s.rval()",
                                     "class_name": $ret_type.get_class_name($generator),
                                     "ntype": str($ret_type),
                                     "level": 2})};
-        SE_SET_RVAL(jsret);
         #else
         cobj->${func_name}($arg_list);
         #end if
@@ -61,5 +61,6 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         #set $arg_idx = $arg_idx + 1
     #end while
 #end if
+    return true;
 }
-SE_FUNC_END
+SE_BIND_FUNC(${signature_name})

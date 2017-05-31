@@ -2,7 +2,7 @@
 
 SE_DECLARE_FINALIZE_FUNC(js_${generator.prefix}_${class_name}_finalize)
 
-SE_CTOR_BEGIN(${signature_name}, __jsb_${generator.prefix}_${class_name}_class, js_${generator.prefix}_${class_name}_finalize)
+static bool ${signature_name}(se::State& s)
 {
 #if len($arguments) >= $min_args
     #set arg_count = len($arguments)
@@ -10,6 +10,7 @@ SE_CTOR_BEGIN(${signature_name}, __jsb_${generator.prefix}_${class_name}_class, 
     #set $count = 0
     #if $arg_idx > 0
     bool ok = true;
+    const auto& args = s.args();
     #end if
     #while $count < $arg_idx
         #set $arg = $arguments[$count]
@@ -37,11 +38,13 @@ SE_CTOR_BEGIN(${signature_name}, __jsb_${generator.prefix}_${class_name}_class, 
         #set $count = $count + 1
     #end while
     #if $arg_idx > 0
-    JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
+    JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
     #end if
     #set $arg_list = ", ".join($arg_array)
     ${namespaced_class_name}* cobj = new (std::nothrow) ${namespaced_class_name}($arg_list);
-    thisObject->setPrivateData(cobj);
+    s.thisObject()->setPrivateData(cobj);
+    s.thisObject()->addRef();
 #end if
+    return true;
 }
-SE_CTOR_END
+SE_BIND_CTOR(${signature_name}, __jsb_${generator.prefix}_${class_name}_class, js_${generator.prefix}_${class_name}_finalize)

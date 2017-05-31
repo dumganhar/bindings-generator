@@ -1,10 +1,11 @@
 ## ===== static function implementation template - for overloaded functions
 
-SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator should support configrue NEED_THIS flag
+static bool ${signature_name}(se::State& s)
 {
     bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
     #for func in $implementations
-    
     #if len($func.arguments) >= $func.min_args
     #set arg_count = len($func.arguments)
     #set arg_idx = $func.min_args
@@ -42,22 +43,21 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
                 #else
             ${func.ret_type.get_whole_name($generator)} result = ${namespaced_class_name}::${func.func_name}($arg_list);
                 #end if
-            se::Value jsret;
             ${func.ret_type.from_native({"generator": $generator,
                                          "in_value": "result",
-                                         "out_value": "jsret",
+                                         "out_value": "s.rval()",
                                          "class_name": $func.ret_type.get_class_name($generator),
                                          "ntype": str($func.ret_type),
                                          "level": 3})};
-            SE_SET_RVAL(jsret);
             #else
             ${namespaced_class_name}::${func.func_name}($arg_list);
             #end if
         }
         #set $arg_idx = $arg_idx + 1
-    } while (0);
+    } while (false);
     #end while
     #end if
     #end for
+    return true;
 }
-SE_FUNC_END
+SE_BIND_FUNC(${signature_name})

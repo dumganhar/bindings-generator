@@ -1,7 +1,7 @@
 do {
     if (${in_value}.isObject() && ${in_value}.toObject()->isFunction())
     {
-        se::Value jsThis(thisObject);
+        se::Value jsThis(s.thisObject());
         se::Value jsFunc(${in_value});
         jsThis.toObject()->attachChild(jsFunc.toObject());
         auto lambda = [=](${lambda_parameters}) -> ${ret_type.name} {
@@ -42,7 +42,7 @@ do {
                                  "out_value": "result",
                                  "ntype": str($ret_type),
                                  "level": 2})};
-            JSB_PRECONDITION2(ok, false, "lambda function : Error processing return value with type ${ret_type.name}");
+            JSB_PRECONDITION3(ok, false, "lambda function : Error processing return value with type ${ret_type.name}");
             #end if
         };
         ${out_value} = lambda;

@@ -1,8 +1,10 @@
 ## ===== static function implementation template
 
-SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator should support configrue NEED_THIS flag
+static bool ${signature_name}(se::State& s)
 {
     bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
 #if len($arguments) >= $min_args
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
@@ -35,7 +37,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
             #set $count = $count + 1
         #end while
         #if $arg_idx > 0
-        JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
+        JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
         #end if
         #set $arg_list = ", ".join($arg_array)
     #if str($ret_type) != "void"
@@ -44,7 +46,7 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         result->retain();
         auto obj = se::Object::createObjectWithClass(__jsb_${generator.prefix}_${class_name}_class, false);
         obj->setPrivateData(result);
-        SE_SET_RVAL(se::Value(obj));
+        s.rval().setObject(obj);
         #elif $func_name.startswith("getInstance") and $is_ref_class
         auto result = ${namespaced_class_name}::${func_name}($arg_list);
         se::Object* obj = nullptr;
@@ -59,21 +61,19 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
             obj = se::Object::getObjectWithPtr(result);
         }
         assert(obj);
-        SE_SET_RVAL(se::Value(obj));
+        s.rval().setObject(obj);
         #else
           #if $ret_type.is_enum
         int result = (int)${namespaced_class_name}::${func_name}($arg_list);
           #else
         ${ret_type.get_whole_name($generator)} result = ${namespaced_class_name}::${func_name}($arg_list);
           #end if
-        se::Value jsret;
         ${ret_type.from_native({"generator": $generator,
                                 "in_value": "result",
-                                "out_value": "jsret",
+                                "out_value": "s.rval()",
                                 "class_name": $ret_type.get_class_name($generator),
                                 "ntype": str($ret_type),
                                 "level": 1})};
-        SE_SET_RVAL(jsret);
         #end if
     #else
         ${namespaced_class_name}::${func_name}($arg_list);
@@ -82,5 +82,6 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
         #set $arg_idx = $arg_idx + 1
     #end while
 #end if
+    return true;
 }
-SE_FUNC_END
+SE_BIND_FUNC(${signature_name})

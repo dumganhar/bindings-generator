@@ -1,11 +1,12 @@
 ## ===== instance function implementation template - for overloaded functions
 
-SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator should support configrue NEED_THIS flag
+static bool ${signature_name}(se::State& s)
 {
     bool ok = true;
-    ${namespaced_class_name}* cobj = (${namespaced_class_name}*)(nativeThisObject);
-    JSB_PRECONDITION2( cobj, false, "${signature_name} : Invalid Native Object");
-
+    ${namespaced_class_name}* cobj = (${namespaced_class_name}*)s.nativeThisObject();
+    JSB_PRECONDITION3( cobj, false, "${signature_name} : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
 #for func in $implementations
 #if len($func.arguments) >= $func.min_args
     #set arg_count = len($func.arguments)
@@ -47,23 +48,22 @@ SE_FUNC_BEGIN(${signature_name}, se::NEED_THIS) //FIXME: bindings-generator shou
             #else
             ${func.ret_type.get_whole_name($generator)} result = cobj->${func.func_name}($arg_list);
             #end if
-            se::Value jsret;
             ${func.ret_type.from_native({"generator": $generator,
                                                       "in_value": "result",
-                                                      "out_value": "jsret",
+                                                      "out_value": "s.rval()",
                                                       "class_name": $func.ret_type.get_class_name($generator),
                                                       "ntype": str($func.ret_type),
                                                       "level": 2})};
-            SE_SET_RVAL(jsret);
         #else
             cobj->${func.func_name}($arg_list);
         #end if
         }
-    } while(0);
+    } while(false);
 
     #set $arg_idx = $arg_idx + 1
     #end while
 #end if
 #end for
+    return true;
 }
-SE_FUNC_END
+SE_BIND_FUNC(${signature_name})
