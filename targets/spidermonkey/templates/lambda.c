@@ -1,7 +1,5 @@
 do {
-    assert(${in_value}.isObject());
-    se::Object* obj = ${in_value}.toObject();
-    if (obj->isFunction())
+    if (${in_value}.isObject() && ${in_value}.toObject()->isFunction())
     {
         se::Value jsThis(thisObject);
         se::Value jsFunc(${in_value});
