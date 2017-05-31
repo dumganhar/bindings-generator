@@ -5,11 +5,13 @@ static bool ${signature_name}(se::State& s)
     ${namespaced_class_name}* cobj = (${namespaced_class_name}*)s.nativeThisObject();
     JSB_PRECONDITION3(cobj, false, "${signature_name} : Invalid Native Object");
 #if len($arguments) >= $min_args
-    bool ok = true;
     const auto& args = s.args();
     size_t argc = args.size();
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
+    #if $arg_count > 0 or $ret_type.name != "void"
+    bool ok = true;
+    #end if
     #while $arg_idx <= $arg_count
     if (argc == ${arg_idx}) {
         #set $count = 0
@@ -54,6 +56,7 @@ static bool ${signature_name}(se::State& s)
                                     "class_name": $ret_type.get_class_name($generator),
                                     "ntype": str($ret_type),
                                     "level": 2})};
+        JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
         #else
         cobj->${func_name}($arg_list);
         #end if

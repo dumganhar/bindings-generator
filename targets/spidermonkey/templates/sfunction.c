@@ -2,12 +2,14 @@
 
 static bool ${signature_name}(se::State& s)
 {
-    bool ok = true;
     const auto& args = s.args();
     size_t argc = args.size();
 #if len($arguments) >= $min_args
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
+    #if $arg_count > 0 or str($ret_type) != "void"
+    bool ok = true;
+    #end if
     #while $arg_idx <= $arg_count
     if (argc == ${arg_idx}) {
         #set arg_list = ""
@@ -74,6 +76,7 @@ static bool ${signature_name}(se::State& s)
                                 "class_name": $ret_type.get_class_name($generator),
                                 "ntype": str($ret_type),
                                 "level": 1})};
+        JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
         #end if
     #else
         ${namespaced_class_name}::${func_name}($arg_list);
