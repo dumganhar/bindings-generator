@@ -53,12 +53,14 @@ static bool ${signature_name}(se::State& s)
             #else
             ${namespaced_class_name}::${func.func_name}($arg_list);
             #end if
+            return true;
         }
         #set $arg_idx = $arg_idx + 1
     } while (false);
     #end while
     #end if
     #end for
-    return true;
+    SE_REPORT_ERROR("wrong number of arguments: %d", (int)argc);
+    return false;
 }
 SE_BIND_FUNC(${signature_name})

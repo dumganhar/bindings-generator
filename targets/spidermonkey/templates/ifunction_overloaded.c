@@ -58,6 +58,7 @@ static bool ${signature_name}(se::State& s)
         #else
             cobj->${func.func_name}($arg_list);
         #end if
+            return true;
         }
     } while(false);
 
@@ -65,6 +66,7 @@ static bool ${signature_name}(se::State& s)
     #end while
 #end if
 #end for
-    return true;
+    SE_REPORT_ERROR("wrong number of arguments: %d", (int)argc);
+    return false;
 }
 SE_BIND_FUNC(${signature_name})

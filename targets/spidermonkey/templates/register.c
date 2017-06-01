@@ -22,7 +22,7 @@ bool js_${generator.prefix}_${current_class.class_name}_finalize(se::State& s)
 {
     if (s.nativeThisObject() != nullptr)
     {
-        CCLOG("jsbindings: finalizing JS object %p (${current_class.namespaced_class_name})", s.nativeThisObject());
+        cocos2d::log("jsbindings: finalizing JS object %p (${current_class.namespaced_class_name})", s.nativeThisObject());
         ${current_class.namespaced_class_name}* cobj = (${current_class.namespaced_class_name}*)s.nativeThisObject();
         #if $current_class.is_ref_class
         cobj->release();
