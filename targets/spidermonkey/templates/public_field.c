@@ -5,7 +5,7 @@ bool ${signature_name}_get_${name}(JSContext *cx, uint32_t argc, jsval *vp)
     JS::RootedObject jsthis(cx, args.thisv().toObjectOrNull());
     js_proxy_t *proxy = jsb_get_js_proxy(jsthis);
     ${namespaced_class_name}* cobj = (${namespaced_class_name} *)(proxy ? proxy->ptr : NULL);
-    JSB_PRECONDITION3( cobj, cx, false, "${signature_name}_get_${name} : Invalid Native Object");
+    JSB_PRECONDITION2( cobj, cx, false, "${signature_name}_get_${name} : Invalid Native Object");
 
     JS::RootedValue jsret(cx);
     #if $ntype.is_object and not $ntype.object_can_convert($generator, False)
@@ -35,7 +35,7 @@ bool ${signature_name}_set_${name}(JSContext *cx, uint32_t argc, jsval *vp)
     JS::RootedObject jsthis(cx, args.thisv().toObjectOrNull());
     js_proxy_t *proxy = jsb_get_js_proxy(jsthis);
     ${namespaced_class_name}* cobj = (${namespaced_class_name} *)(proxy ? proxy->ptr : NULL);
-    JSB_PRECONDITION3( cobj, cx, false, "${signature_name}_set_${name} : Invalid Native Object");
+    JSB_PRECONDITION2( cobj, cx, false, "${signature_name}_set_${name} : Invalid Native Object");
 
     bool ok = true;
 #if $ntype.is_numeric
@@ -66,7 +66,7 @@ bool ${signature_name}_set_${name}(JSContext *cx, uint32_t argc, jsval *vp)
                         "arg":$ntype,
                     })};
 #end if
-    JSB_PRECONDITION3(ok, cx, false, "${signature_name}_set_${name} : Error processing new value");
+    JSB_PRECONDITION2(ok, cx, false, "${signature_name}_set_${name} : Error processing new value");
     cobj->$pretty_name = arg0;
     return true;
 }

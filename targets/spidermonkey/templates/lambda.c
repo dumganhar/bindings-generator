@@ -42,7 +42,7 @@ do {
                                  "out_value": "result",
                                  "ntype": str($ret_type),
                                  "level": 2})};
-            JSB_PRECONDITION3(ok, false, "lambda function : Error processing return value with type ${ret_type.name}");
+            JSB_PRECONDITION2(ok, false, "lambda function : Error processing return value with type ${ret_type.name}");
             #end if
         };
         ${out_value} = lambda;

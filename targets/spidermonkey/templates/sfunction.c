@@ -39,7 +39,7 @@ static bool ${signature_name}(se::State& s)
             #set $count = $count + 1
         #end while
         #if $arg_idx > 0
-        JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
+        JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
         #end if
         #set $arg_list = ", ".join($arg_array)
     #if str($ret_type) != "void"
@@ -76,7 +76,7 @@ static bool ${signature_name}(se::State& s)
                                 "class_name": $ret_type.get_class_name($generator),
                                 "ntype": str($ret_type),
                                 "level": 1})};
-        JSB_PRECONDITION3(ok, false, "${signature_name} : Error processing arguments");
+        JSB_PRECONDITION2(ok, false, "${signature_name} : Error processing arguments");
         #end if
     #else
         ${namespaced_class_name}::${func_name}($arg_list);

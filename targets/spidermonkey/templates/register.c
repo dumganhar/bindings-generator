@@ -25,7 +25,10 @@ bool js_${generator.prefix}_${current_class.class_name}_finalize(se::State& s)
         cocos2d::log("jsbindings: finalizing JS object %p (${current_class.namespaced_class_name})", s.nativeThisObject());
         ${current_class.namespaced_class_name}* cobj = (${current_class.namespaced_class_name}*)s.nativeThisObject();
         #if $current_class.is_ref_class
-        cobj->release();
+        if (cobj->getReferenceCount() == 1)
+            cobj->autorelease();
+        else
+            cobj->release();
         #else
         delete cobj;
         #end if
