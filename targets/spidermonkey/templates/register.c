@@ -76,6 +76,7 @@ bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj
     cls->defineFinalizedFunction(_SE(js_${generator.prefix}_${current_class.class_name}_finalize));
 #end if
     cls->install();
+    JSBClassType::registerClass<${current_class.namespaced_class_name}>(cls);
 
     __jsb_${generator.prefix}_${current_class.class_name}_proto = cls->getProto();
     __jsb_${generator.prefix}_${current_class.class_name}_class = cls;
