@@ -5,6 +5,9 @@ do {
         se::Value jsFunc(${in_value});
         jsThis.toObject()->attachChild(jsFunc.toObject());
         auto lambda = [=](${lambda_parameters}) -> ${ret_type.name} {
+            se::ScriptEngine::getInstance()->clearException();
+            se::AutoHandleScope hs;
+
             #set arg_count = len($param_types)
             #if $arg_count > 0 or $ret_type.name != "void"
             bool ok = true;
