@@ -17,8 +17,12 @@ ${current_class.methods.constructor.generate_code($current_class)}
 #end if
 #end if
 
+#if len($current_class.parents) > 0
+extern se::Object* __jsb_${current_class.parents[0].underlined_class_name}_proto;
+#end if
+
 #if $has_constructor
-bool js_${generator.prefix}_${current_class.class_name}_finalize(se::State& s)
+bool js_${current_class.underlined_class_name}_finalize(se::State& s)
 {
     if (s.nativeThisObject() != nullptr)
     {
@@ -35,20 +39,20 @@ bool js_${generator.prefix}_${current_class.class_name}_finalize(se::State& s)
     }
     return true;
 }
-SE_BIND_FINALIZE_FUNC(js_${generator.prefix}_${current_class.class_name}_finalize)
+SE_BIND_FINALIZE_FUNC(js_${current_class.underlined_class_name}_finalize)
 #end if
 
 bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj)
 {
 #if has_constructor
     #if len($current_class.parents) > 0
-    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${generator.prefix}_${current_class.parents[0].class_name}_proto, _SE(js_${generator.prefix}_${current_class.class_name}_constructor));
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${current_class.parents[0].underlined_class_name}_proto, _SE(js_${generator.prefix}_${current_class.class_name}_constructor));
     #else
     auto cls = se::Class::create("${current_class.target_class_name}", obj, nullptr, _SE(js_${generator.prefix}_${current_class.class_name}_constructor));
     #end if
 #else
     #if len($current_class.parents) > 0
-    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${generator.prefix}_${current_class.parents[0].class_name}_proto, nullptr);
+    auto cls = se::Class::create("${current_class.target_class_name}", obj, __jsb_${current_class.parents[0].underlined_class_name}_proto, nullptr);
     #else
     auto cls = se::Class::create("${current_class.target_class_name}", obj, nullptr, nullptr);
     #end if
@@ -73,13 +77,13 @@ bool js_register_${generator.prefix}_${current_class.class_name}(se::Object* obj
     #end for
 #end if
 #if $has_constructor
-    cls->defineFinalizedFunction(_SE(js_${generator.prefix}_${current_class.class_name}_finalize));
+    cls->defineFinalizedFunction(_SE(js_${current_class.underlined_class_name}_finalize));
 #end if
     cls->install();
     JSBClassType::registerClass<${current_class.namespaced_class_name}>(cls);
 
-    __jsb_${generator.prefix}_${current_class.class_name}_proto = cls->getProto();
-    __jsb_${generator.prefix}_${current_class.class_name}_class = cls;
+    __jsb_${current_class.underlined_class_name}_proto = cls->getProto();
+    __jsb_${current_class.underlined_class_name}_class = cls;
 
 #if $generator.in_listed_extend_classed($current_class.class_name) and not $current_class.is_abstract
     se::ScriptEngine::getInstance()->executeScriptBuffer("(function () { ${generator.target_ns}.${current_class.target_class_name}.extend = cc.Class.extend; })()");

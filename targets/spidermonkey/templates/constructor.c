@@ -1,6 +1,6 @@
 ## ===== constructor function implementation template
 
-SE_DECLARE_FINALIZE_FUNC(js_${generator.prefix}_${class_name}_finalize)
+SE_DECLARE_FINALIZE_FUNC(js_${underlined_class_name}_finalize)
 
 static bool ${signature_name}(se::State& s)
 {
@@ -47,4 +47,4 @@ static bool ${signature_name}(se::State& s)
 #end if
     return true;
 }
-SE_BIND_CTOR(${signature_name}, __jsb_${generator.prefix}_${class_name}_class, js_${generator.prefix}_${class_name}_finalize)
+SE_BIND_CTOR(${signature_name}, __jsb_${underlined_class_name}_class, js_${underlined_class_name}_finalize)

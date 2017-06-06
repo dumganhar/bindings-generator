@@ -46,7 +46,7 @@ static bool ${signature_name}(se::State& s)
         #if $func_name.startswith("create") and $is_ref_class
         auto result = ${namespaced_class_name}::${func_name}($arg_list);
         result->retain();
-        auto obj = se::Object::createObjectWithClass(__jsb_${generator.prefix}_${class_name}_class, false);
+        auto obj = se::Object::createObjectWithClass(__jsb_${underlined_class_name}_class, false);
         obj->setPrivateData(result);
         s.rval().setObject(obj);
         #elif $func_name.startswith("getInstance") and $is_ref_class
@@ -54,7 +54,7 @@ static bool ${signature_name}(se::State& s)
         se::Object* obj = nullptr;
         if (result->_scriptObject == nullptr)
         {
-            obj = se::Object::createObjectWithClass(__jsb_${generator.prefix}_${class_name}_class, true);
+            obj = se::Object::createObjectWithClass(__jsb_${underlined_class_name}_class, true);
             obj->setPrivateData(result);
             result->_scriptObject = obj;
         }
