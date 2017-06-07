@@ -145,7 +145,7 @@ conversions:
     # "ResourceData": "${out_value} = resourcedata_to_jsval(${in_value})"
     "TouchEventType": "ok &= int32_to_seval((int32_t)${in_value}, &${out_value})"
     "EventType": "ok &= int32_to_seval((int32_t)${in_value}, &${out_value})"
-    # "ManifestAsset": "${out_value} = asset_to_jsval(${in_value})"
+    "ManifestAsset": "ok &= ManifestAsset_to_seval(${in_value}, &${out_value})"
     # "@DownloadTask.*": "${out_value} = downloadTask_to_jsval(${in_value})"
     # "@shared_ptr<.*DownloadTask.*": "${out_value} = downloadTask_to_jsval(*${in_value})"
     object: "ok &= native_ptr_to_seval<${ntype.replace('*', '').replace('const ', '')}>((${ntype.replace('const ', '')})${in_value}, &${out_value})"
