@@ -10,7 +10,7 @@ static bool ${signature_name}(se::State& s)
     #set arg_count = len($arguments)
     #set arg_idx = $min_args
     #if $arg_count > 0 or $ret_type.name != "void"
-    bool ok = true;
+    CC_UNUSED bool ok = true;
     #end if
     #while $arg_idx <= $arg_count
     if (argc == ${arg_idx}) {

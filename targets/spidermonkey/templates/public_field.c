@@ -5,7 +5,7 @@ static bool ${signature_name}_get_${name}(se::State& s)
     ${namespaced_class_name}* cobj = (${namespaced_class_name}*)s.nativeThisObject();
     JSB_PRECONDITION2(cobj, false, "${signature_name}_get_${name} : Invalid Native Object");
 
-    bool ok = true;
+    CC_UNUSED bool ok = true;
     se::Value jsret;
     #if $ntype.is_object and not $ntype.object_can_convert($generator, False)
     ${ntype.from_native({"generator": $generator,
@@ -36,7 +36,7 @@ static bool ${signature_name}_set_${name}(se::State& s)
     ${namespaced_class_name}* cobj = (${namespaced_class_name}*)s.nativeThisObject();
     JSB_PRECONDITION2(cobj, false, "${signature_name}_set_${name} : Invalid Native Object");
 
-    bool ok = true;
+    CC_UNUSED bool ok = true;
 #if $ntype.is_numeric
     ${ntype.to_string($generator)} arg0 = 0;
 #elif $ntype.is_pointer

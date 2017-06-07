@@ -10,7 +10,7 @@ do {
 
             #set arg_count = len($param_types)
             #if $arg_count > 0 or $ret_type.name != "void"
-            bool ok = true;
+            CC_UNUSED bool ok = true;
             #end if
             #if $arg_count > 0
             se::ValueArray args;

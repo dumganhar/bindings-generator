@@ -2,7 +2,7 @@
 
 static bool ${signature_name}(se::State& s)
 {
-    bool ok = true;
+    CC_UNUSED bool ok = true;
     ${namespaced_class_name}* cobj = (${namespaced_class_name}*)s.nativeThisObject();
     JSB_PRECONDITION2( cobj, false, "${signature_name} : Invalid Native Object");
     const auto& args = s.args();

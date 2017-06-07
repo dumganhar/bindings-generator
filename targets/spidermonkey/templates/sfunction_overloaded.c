@@ -2,7 +2,7 @@
 
 static bool ${signature_name}(se::State& s)
 {
-    bool ok = true;
+    CC_UNUSED bool ok = true;
     const auto& args = s.args();
     size_t argc = args.size();
     #for func in $implementations

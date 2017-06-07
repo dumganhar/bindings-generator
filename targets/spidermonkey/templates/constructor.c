@@ -9,7 +9,7 @@ static bool ${signature_name}(se::State& s)
     #set arg_idx = $min_args
     #set $count = 0
     #if $arg_idx > 0
-    bool ok = true;
+    CC_UNUSED bool ok = true;
     const auto& args = s.args();
     #end if
     #while $count < $arg_idx
