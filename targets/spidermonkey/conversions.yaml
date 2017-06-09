@@ -83,6 +83,7 @@ conversions:
     "ListenerID": "ok &= seval_to_std_string(${in_value}, &${out_value})"
     # "DownloaderHints": "ok &= seval_to_DownloaderHints(${in_value}, &${out_value})"
     "Viewport": "ok &= seval_to_Viewport(${in_value}, &${out_value})"
+    "Data": "ok &= seval_to_Data(${in_value}, &${out_value})"
     object: "ok &= seval_to_native_ptr(${in_value}, &${out_value})"
 
   from_native:
@@ -151,4 +152,5 @@ conversions:
     # "@DownloadTask.*": "${out_value} = downloadTask_to_jsval(${in_value})"
     # "@shared_ptr<.*DownloadTask.*": "${out_value} = downloadTask_to_jsval(*${in_value})"
     "Viewport": "ok &= Viewport_to_seval(${in_value}, &${out_value})"
+    "Data": "ok &= Data_to_seval(${in_value}, &${out_value})"
     object: "ok &= native_ptr_to_seval<${ntype.replace('*', '').replace('const ', '')}>((${ntype.replace('const ', '')})${in_value}, &${out_value})"
