@@ -3,7 +3,10 @@ do {
     {
         se::Value jsThis(s.thisObject());
         se::Value jsFunc(${in_value});
-        jsThis.toObject()->attachChild(jsFunc.toObject());
+        if (jsThis.isObject())
+            jsThis.toObject()->attachChild(jsFunc.toObject());
+        else
+            jsFunc.toObject()->setKeepRootedUntilDie(true);
         auto lambda = [=](${lambda_parameters}) -> ${ret_type.name} {
             se::ScriptEngine::getInstance()->clearException();
             se::AutoHandleScope hs;
@@ -28,7 +31,7 @@ do {
                 #set $count = $count + 1
             #end while
             se::Value rval;
-            se::Object* thisObj = jsThis.toObject();
+            se::Object* thisObj = jsThis.isObject() ? jsThis.toObject() : nullptr;
             se::Object* funcObj = jsFunc.toObject();
             #if $arg_count > 0
             bool succeed = funcObj->call(args, thisObj, &rval);
