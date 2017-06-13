@@ -43,6 +43,8 @@ type_map = {
     # cindex.TypeKind.ENUM        : "int"
 }
 
+four_space = "    "
+
 INVALID_NATIVE_TYPE = "??"
 
 default_arg_type_arr = [
@@ -361,7 +363,7 @@ class NativeType(object):
         if self.is_function:
             tpl = Template(file=os.path.join(generator.target, "templates", "lambda.c"),
                 searchList=[convert_opts, self])
-            indent = convert_opts['level'] * "\t"
+            indent = convert_opts['level'] * four_space
             return str(tpl).replace("\n", "\n" + indent)
 
 
@@ -369,7 +371,7 @@ class NativeType(object):
             tpl = NativeType.dict_get_value_re(to_native_dict, keys)
             tpl = Template(tpl, searchList=[convert_opts])
             return str(tpl).rstrip()
-        return "#pragma warning NO CONVERSION TO NATIVE FOR " + self.name + "\n" + convert_opts['level'] * "\t" +  "ok = false"
+        return "#pragma warning NO CONVERSION TO NATIVE FOR " + self.name + "\n" + convert_opts['level'] * four_space +  "ok = false"
 
     def to_string(self, generator):
         conversions = generator.config['conversions']
@@ -427,7 +429,7 @@ class NativeType(object):
 
         cls_name = original_name.replace('*', '').replace('const ', '').replace('&', '')
         cls_name = cls_name.split("::")[-1]
-        print("get_class_name: " + original_name + " -> " + cls_name)
+        # print("get_class_name: " + original_name + " -> " + cls_name)
         return cls_name;
 
     def object_can_convert(self, generator, is_to_native = True):
@@ -573,6 +575,7 @@ class NativeFunction(object):
         self.is_ctor = is_ctor
         gen = current_class.generator if current_class else generator
         config = gen.config
+        print("NativeFunction: " + current_class.namespaced_class_name + ':' + self.func_name + ", is_constructor:" + str(self.is_constructor) + ", is_ctor:" + str(self.is_ctor))
         if not is_ctor:
             tpl = Template(file=os.path.join(gen.target, "templates", "function.h"),
                         searchList=[current_class, self])
@@ -675,6 +678,7 @@ class NativeOverloadedFunction(object):
         gen = current_class.generator
         config = gen.config
         static = self.implementations[0].static
+        print("NativeOverloadedFunction: " + current_class.namespaced_class_name + ':' + self.func_name + ", is_constructor:" + str(self.is_constructor) + ", is_ctor:" + str(self.is_ctor))
         if not is_ctor:
             tpl = Template(file=os.path.join(gen.target, "templates", "function.h"),
                         searchList=[current_class, self])
@@ -702,7 +706,11 @@ class NativeOverloadedFunction(object):
                         tpl = Template(config['definitions']['ctor'],
                                         searchList=[current_class, self])
                     self.signature_name = str(tpl)
-            tpl = Template(file=os.path.join(gen.target, "templates", "ifunction_overloaded.c"),
+            if self.is_constructor and gen.script_type == "spidermonkey" :
+                tpl = Template(file=os.path.join(gen.target, "templates", "constructor_overloaded.c"),
+                                                searchList=[current_class, self])
+            else :
+                tpl = Template(file=os.path.join(gen.target, "templates", "ifunction_overloaded.c"),
                             searchList=[current_class, self])
         if not is_override:
             gen.impl_file.write(str(tpl))
@@ -737,6 +745,7 @@ class NativeClass(object):
         self.static_methods = {}
         self.generator = generator
         self.is_abstract = self.class_name in generator.abstract_classes
+        self.is_persistent = self.class_name in generator.persistent_classes
         self._current_visibility = cindex.AccessSpecifierKind.PRIVATE
         #for generate lua api doc
         self.override_methods = {}
@@ -993,6 +1002,7 @@ class Generator(object):
         self.classes_have_no_parents = opts['classes_have_no_parents'].split(' ')
         self.base_classes_to_skip = opts['base_classes_to_skip'].split(' ')
         self.abstract_classes = opts['abstract_classes'].split(' ')
+        self.persistent_classes = opts['persistent_classes'].split(' ') if opts['persistent_classes'] != None else []
         self.clang_args = opts['clang_args']
         self.target = opts['target']
         self.remove_prefix = opts['remove_prefix']
@@ -1543,6 +1553,7 @@ def main():
                 'classes_have_no_parents': config.get(s, 'classes_have_no_parents'),
                 'base_classes_to_skip': config.get(s, 'base_classes_to_skip'),
                 'abstract_classes': config.get(s, 'abstract_classes'),
+                'persistent_classes': config.get(s, 'persistent_classes') if config.has_option(s, 'persistent_classes') else None,
                 'skip': config.get(s, 'skip'),
                 'field': config.get(s, 'field') if config.has_option(s, 'field') else None,
                 'rename_functions': config.get(s, 'rename_functions'),

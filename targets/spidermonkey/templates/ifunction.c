@@ -36,6 +36,8 @@ static bool ${signature_name}(se::State& s)
                              "out_value": "arg" + str(count),
                              "class_name": $class_name,
                              "level": 2,
+                             "is_static": False,
+                             "is_persistent": $is_persistent,
                              "ntype": str($arg)})};
             #set $arg_array += ["arg"+str(count)]
             #set $count = $count + 1

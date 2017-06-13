@@ -3,10 +3,11 @@ do {
     {
         se::Value jsThis(s.thisObject());
         se::Value jsFunc(${in_value});
-        if (jsThis.isObject())
-            jsThis.toObject()->attachChild(jsFunc.toObject());
-        else
-            jsFunc.toObject()->setKeepRootedUntilDie(true);
+        #if $is_static or $is_persistent
+        jsFunc.toObject()->setKeepRootedUntilDie(true);
+        #else
+        jsThis.toObject()->attachChild(jsFunc.toObject());
+        #end if
         auto lambda = [=](${lambda_parameters}) -> ${ret_type.name} {
             se::ScriptEngine::getInstance()->clearException();
             se::AutoHandleScope hs;
